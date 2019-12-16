@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Sample</title>
+    <style>
+      svg {
+        width: 320px;
+        height: 240px;
+        border: 1px solid black;
+      }
+      .bar {
+        fill: orange;
+      }
+    </style>
+    <script src="http://d3js.org/d3.v3.min.js"></script>
+    <script>
+      window.onload = function() {
+        d3.tsv("data.tsv", function(error, data) {
+          var dataSet = [];
+          for(var i = 0; i< data.length ; i++) {
+            dataSet.push(data[i].x);
+          }
+
+          d3.select("#myGraph")
+            .selectAll("rect")
+            .data(dataSet)
+            .enter()
+            .append("rect")
+            .attr("class", "bar")
+            .attr("width", function(d, i) {
+              return d;
+            })
+            .attr("height", 20)
+            .attr("x", 0)
+            .attr("y", function(d, i) {
+                return i * 25;
+            })
+        })
+      };
+    </script>
+  </head>
+  <body>
+    <h1>데이터에 따라 그래프 표시</h1>
+    <svg id="myGraph"></svg>
+  </body>
+</html>
