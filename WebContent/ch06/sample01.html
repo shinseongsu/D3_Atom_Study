@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Sample</title>
+    <style>
+      svg {
+        width: 320px;
+        height: 240px;
+        border: 1px solid black;
+      }
+      .bar {
+        fill: orange;
+      }
+    </style>
+    <script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+    <script>
+      window.onload = function() {
+        var svgHeight = 240;
+        var barElements;
+        var dataSet = [120, 70, 175, 80, 220];
+
+        barElements = d3.select("#myGraph")
+                        .selectAll("rect")
+                        .data(dataSet)
+
+        barElements.enter()
+                   .append("rect")
+                   .attr("class", "bar")
+                   .attr("height", function(d,i){
+                     return d;
+                   })
+                   .attr("width", 20)
+                   .attr("x", function(d,i) {
+                     return i * 25;
+                   })
+                   .attr("y", function(d,i) {
+                     return svgHeight - d;
+                   })
+      }
+    </script>
+  </head>
+  <body>
+    <h1>세로형 막대그래프를 표시</h1>
+    <svg id="myGraph"></svg>
+  </body>
+</html>
