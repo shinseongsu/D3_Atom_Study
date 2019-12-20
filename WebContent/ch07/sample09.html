@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Sample</title>
+    <style>
+      svg {
+        width: 320px;
+        height: 240px;
+        border: 1px solid black;
+      }
+      .pie {
+        fill: orange;
+        stroke: white;
+      }
+      .total {
+        font-size: 9pt;
+        text-anchor: middle;
+      }
+      .pieNum {
+        font-size: 10pt;
+        text-anchor: middle;
+      }
+    </style>
+    <script src="http://d3js.org/d3.v3.min.js"></script>
+    <script>
+      window.onload = function() {
+        var svgWidth = 320;
+        var svgHeight = 240;
+        var dataSet = [50, 30, 12, 5, 3];
+        var color = d3.scale.category10();
+        var pie = d3.layout.pie()
+                    .value(function(d,i){ return d; });
+        var arc = d3.svg.arc().innerRadius(30).outerRadius(100);
+        var pieElements = d3.select("#myGraph")
+                            .selectAll("g")
+                            .data(pie(dataSet))
+                            .enter()
+                            .append("g")
+                            .attr("transform", "translate(" + svgWidth/2 + ", " + svgHeight/2 + ")");
+
+        pieElements.append("path")
+                   .attr("class", "pie")
+                   .style("fill", function(d,i) {
+                     return color(i);
+                   })
+                   .transition()
+                   .duration(200)
+                   .delay(function(d,i) {
+                     return i * 200;
+                   })
+                   .ease("linear")
+                   .attrTween("d", function(d, i) {
+                     var interpolate = d3.interpolate(
+                      { startAngle : d.startAngle, endAngle : d.startAngle },
+                      { startAngle : d.startAngle, endAngle : d.endAngle }
+                    );
+                    return function(t) {
+                      return arc(interpolate(t));
+                    }
+                   })
+
+           var textElements = d3.select("#myGraph")
+                                .append("text")
+                                .attr("class", "total")
+                                .attr("transform", "translate(" + svgWidth/2 + ", " + (svgHeight/2+5) + ")")
+                                .text("합계:" + d3.sum(dataSet))
+
+           pieElements.append("text")
+                      .attr("class", "pieNum")
+                      .attr("transform", function(d,i) {
+                        return "translate(" + arc.centroid(d) + ")";
+                      })
+                      .text(function(d, i) {
+                        return d.value;
+                      })
+
+      }
+    </script>
+  </head>
+  <body>
+    <h1>원 그래프에 숫자 표시</h1>
+    <svg id="myGraph"></svg>
+  </body>
+</html>

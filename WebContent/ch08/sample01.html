@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Sample</title>
+    <style>
+      svg {
+        width : 380px;
+        height: 240px;
+        border: 1px solid black;
+      }
+      .line {
+        fill: none;
+        stroke: black;
+      }
+    </style>
+    <script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+  </head>
+  <script>
+    window.onload = function() {
+
+      var svgWidth = 320;
+      var svgHeight = 240;
+      var dataSet = [10, 47, 65, 8, 64, 99, 75, 22, 63, 80];
+      var margin = svgWidth/(dataSet.length -1)
+      var line = d3.svg.line()
+                   .x(function(d,i) {
+                     return i * margin;
+                   })
+                   .y(function(d,i) {
+                     return svgHeight - d;
+                   })
+
+      var lineElements = d3.select("#myGraph")
+                           .append("path")
+                           .attr("class", "line")
+                           .attr("d", line(dataSet))
+
+    }
+  </script>
+  <body>
+    <h1>꺾은선 그래프 표시</h1>
+    <svg id="myGraph"></svg>
+  </body>
+</html>
