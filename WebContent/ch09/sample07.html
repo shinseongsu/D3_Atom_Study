@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Sample</title>
+    <style>
+      svg {
+        width: 380px;
+        height: 300px;
+        border: 1px solid black;
+      }
+      .mark {
+        fill: red;
+        stroke: none;
+      }
+      .axis test {
+        font-family : sans-serif;
+        font-size: 11px;
+      }
+      .axis path,
+      .axis line {
+        fill: none;
+        stroke: black;
+      }
+      .grid {
+        stroke : gray;
+        stroke-dasharray: 4, 2;
+        shape-rendering: crispEdges;
+      }
+      .tip {
+        position: absolute;
+        top: 0px;
+        left: 0px;
+        z-index: 9999;
+        visibility: hidden;
+        border: 1px solid black;
+        background-color: yellow;
+        width: 80px;
+        height: 16px;
+        overflow: hidden;
+        text-align: center;
+        font-size: 9pt;
+        font-family: Tahoma, Optima, Helvetica;
+        color: black;
+      }
+    </style>
+    <script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+    <script>
+      window.onload = function() {
+
+        d3.csv("mydata.csv", function(error, data) {
+          var svgEle = document.getElementById("myGraph");
+          var svgWidth = window.getComputedStyle(svgEle, null).
+                                                    getPropertyValue("width");
+          var svgHeight = window.getComputedStyle(svgEle, null).
+                                                    getPropertyValue("height");
+
+          svgWidth = parseFloat(svgWidth);
+          svgHeight = parseFloat(svgHeight);
+          var offsetX = 30;
+          var offsetY = 20;
+          var svg = d3.select("#myGraph");
+
+          var dataSet = [];
+          data.forEach(function(d, i){
+            dataSet.push([d.total/100, d.bug*1, d.tiem * 1]);
+          });
+
+          var circleElements = svg
+            .selectAll("circle")
+            .data(dataSet)
+
+          circleElements
+              .enter()
+              .append("circle")
+              .attr("class", "mark")
+              .attr("cx", svgWidth/2 + offsetX)
+              .attr("cy", svgHeight/2 - offsetY)
+              .attr("r", 100)
+              .attr("opacity", 0)
+              .transition()
+              .duration(2000)
+              .ease("bounce")
+              .attr("cx", function(d,i) {
+                return d[0] + offsetX;
+              })
+              .attr("cy", function(d,i) {
+                return svgHeight - d[1] - offsetY;
+              })
+              .attr("r", 5)
+              .attr("opacity", 1.0)
+
+          function drawScale(){
+            var maxX = d3.max(dataSet, function(d, i){
+              return d[0];
+            });
+            var maxY = d3.max(dataSet, function(d, i){
+              return d[1];
+            });
+
+            var yScale = d3.scale.linear()
+              .domain([0, maxY])
+              .range([maxY, 0])
+
+            svg.append("g")
+               .attr("class", "axis")
+               .attr("transform", "translate("+offsetX+", "+(svgHeight-maxY-offsetY)+")")
+               .call(
+                    d3.svg.axis()
+                    .scale(yScale)
+                    .orient("left")
+                )
+
+            var xScale = d3.scale.linear()
+                .domain([0, maxX])
+                .range([0, maxX])
+
+            svg.append("g")
+               .attr("class", "axis")
+               .attr("transform", "translate("+offsetX+", "+(svgHeight-offsetY)+")")
+               .call(
+                      d3.svg.axis()
+                      .scale(xScale)
+                      .orient("bottom")
+              )
+
+            var grid = svg.append("g")
+
+            var rangeX = d3.range(50, maxX, 50);
+            var rangeY = d3.range(20, maxY, 20);
+
+            grid.selectAll("line.y")
+                 .data(rangeY)
+                 .enter()
+                 .append("line")
+                 .attr("class", "grid")
+                 .attr("x1", offsetX)
+                 .attr("y1", function(d, i){
+                    return svgHeight - d - offsetY;
+                 })
+                 .attr("x2", maxX + offsetX)
+                 .attr("y2", function(d, i){
+                    return svgHeight - d - offsetY;
+                 })
+
+            grid.selectAll("line.x")
+                .data(rangeX)
+                .enter()
+                .append("line")
+                .attr("class", "grid")
+                .attr("x1", function(d, i){
+                  return d + offsetX;
+                })
+                .attr("y1", svgHeight - offsetY)
+                .attr("x2", function(d, i){
+                  return d + offsetX;
+                })
+                .attr("y2", svgHeight -offsetY - maxY)
+            }
+
+            var tooltip = d3.select("body")
+                           .append("div")
+                           .attr("class", "tip")
+
+            circleElements.on("mouseover", function(d) {
+                 var x = parseInt(d[0]);
+                 var y = parseInt(d[1]);
+                 var data = d3.select(this).datum();
+                 var t = parseInt(data[2]);
+                 var dx = parseInt(data[0]);
+                 var dy = parseInt(data[1]);
+
+                 tooltip.style("left", offsetX + x + "px")
+                        .style("top", svgHeight + offsetY - y + "px")
+                        .style("visibility", "visible")
+                        .text(dx+ ", " + dy)
+                        .text(t+"시간")
+            })
+              .on("mouseout", function() {
+                  tooltip.style("visibility", "hidden")
+            })
+
+            drawScale();
+
+        });
+
+      }
+    </script>
+  </head>
+  <body>
+    <h1>CSV 데이터를 불러와 산포도 표시</h1>
+    <svg id="myGraph"></svg>
+  </body>
+</html>

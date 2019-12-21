@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Sample</title>
+    <style>
+      svg {
+        width: 380px;
+        height: 300px;
+        border: 1px solid black;
+      }
+      .mark {
+        fill: red;
+        stroke: none;
+      }
+      .axis test {
+        font-family : sans-serif;
+        font-size: 11px;
+      }
+      .axis path,
+      .axis line {
+        fill: none;
+        stroke: black;
+      }
+      .grid {
+        stroke : gray;
+        stroke-dasharray: 4, 2;
+        shape-rendering: crispEdges;
+      }
+      .tip {
+        position: absolute;
+        top: 0px;
+        left: 0px;
+        z-index: 9999;
+        visibility: hidden;
+        border: 1px solid black;
+        background-color: yellow;
+        width: 80px;
+        height: 16px;
+        overflow: hidden;
+        text-align: center;
+        font-size: 9pt;
+        font-family: Tahoma, Optima, Helvetica;
+        color: black;
+      }
+    </style>
+    <script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+    <script>
+      window.onload = function() {
+        var svgWidth = 320;
+        var svgHeight = 300;
+        var offsetX = 30;
+        var offsetY = 20;
+        var svg = d3.select("#myGraph");
+
+        var dataSet = [
+        		[30, 40], [120, 115], [125, 90], [150, 160], [300, 170],
+        		[60, 40], [140, 145], [165, 110], [200, 260], [280, 160]
+        	];
+
+        var circleElements = svg
+          .selectAll("circle")
+          .data(dataSet)
+        circleElements
+          .enter()
+          .append("circle")
+          .attr("class", "mark")
+          .attr("cx", function(d, i){
+        		return d[0] + offsetX;
+        	})
+          .attr("cy", function(d, i){
+        		return svgHeight-d[1] - offsetY;
+        	})
+          .attr("r", 5)
+
+        function updateData(data){
+        	var result = data.map(function(d, i){
+        		var x = Math.random() * svgWidth;
+        		var y = Math.random() * svgHeight;
+        		return [x, y];
+        	})
+        	return result;
+        }
+
+        function updateGraph(){
+        	circleElements
+        	  .data(dataSet)
+        	  .transition()
+        	  .attr("cx", function(d, i){
+        			return d[0] + offsetX;
+        		})
+        	  .attr("cy", function(d, i){
+        			return svgHeight-d[1] - offsetY;
+        		})
+        }
+
+        function drawScale(){
+        	var maxX = d3.max(dataSet, function(d, i){
+        		return d[0];
+        	});
+        	var maxY = d3.max(dataSet, function(d, i){
+        		return d[1];
+        	});
+
+        	var yScale = d3.scale.linear()
+        	  .domain([0, maxY])
+        	  .range([maxY, 0])
+
+        	svg.append("g")
+        	  .attr("class", "axis")
+        	  .attr("transform", "translate("+offsetX+", "+(svgHeight-maxY-offsetY)+")")
+        	  .call(
+        			d3.svg.axis()
+        		  .scale(yScale)
+        		  .orient("left")
+        		)
+
+        	var xScale = d3.scale.linear()
+        	  .domain([0, maxX])
+        	  .range([0, maxX])
+
+        	svg.append("g")
+        		  .attr("class", "axis")
+        		  .attr("transform", "translate("+offsetX+", "+(svgHeight-offsetY)+")")
+        		  .call(
+        				d3.svg.axis()
+        			  .scale(xScale)
+        			  .orient("bottom")
+        			)
+
+        	var grid = svg.append("g")
+
+        	var rangeX = d3.range(50, maxX, 50);
+        	var rangeY = d3.range(20, maxY, 20);
+
+        	grid.selectAll("line.y")
+        	  .data(rangeY)
+        	  .enter()
+        	  .append("line")
+        	  .attr("class", "grid")
+        	  .attr("x1", offsetX)
+        	  .attr("y1", function(d, i){
+        			return svgHeight - d - offsetY;
+        		})
+        	  .attr("x2", maxX + offsetX)
+        	  .attr("y2", function(d, i){
+        			return svgHeight - d - offsetY;
+        		})
+
+        	grid.selectAll("line.x")
+        	  .data(rangeX)
+        	  .enter()
+        	  .append("line")
+        	  .attr("class", "grid")
+        	  .attr("x1", function(d, i){
+        			return d + offsetX;
+        		})
+        	  .attr("y1", svgHeight - offsetY)
+        	  .attr("x2", function(d, i){
+        			return d + offsetX;
+        		})
+        	  .attr("y2", svgHeight -offsetY - maxY)
+        }
+
+        var tooltip = d3.select("body")
+                       .append("div")
+                       .attr("class", "tip")
+
+        circleElements.on("mouseover", function(d) {
+          var x = parseInt(d[0]);
+          var y = parseInt(d[1]);
+          var data = d3.select(this).datum();
+          var dx = parseInt(data[0]);
+          var dy = parseInt(data[1]);
+
+          tooltip.style("left", offsetX + x + "px")
+                 .style("top", svgHeight + offsetY - y + "px")
+                 .style("visibility", "visible")
+                 .text(dx+ ", " + dy)
+        })
+        .on("mouseout", function() {
+           tooltip.style("visibility", "hidden")
+        })
+
+
+        drawScale();
+
+        setInterval(function(){
+        	dataSet = updateData(dataSet);
+        	updateGraph();
+        }, 4000);
+
+
+      }
+    </script>
+  </head>
+  <body>
+    <h1>산포도 표시</h1>
+    <svg id="myGraph"></svg>
+  </body>
+</html>
