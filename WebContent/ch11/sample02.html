@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Sample</title>
+    <style>
+      svg {
+        width : 380px;
+        height: 240px;
+        border: 1px solid black;
+      }
+      .bar {
+        fill: #aaa;
+        stroke: white;
+        stroke-width: 1;
+      }
+    </style>
+    <script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+    <script>
+      window.onload = function() {
+        var svgWidth = 320;
+        var svgHeight = 240;
+        var barWidth = svgWidth / 11;
+        var dataSet = [
+          50, 95, 60, 44, 60, 50, 35, 20, 10, 8,
+          56, 70, 65, 42, 22, 33, 40, 53, 52, 89,
+          90, 55, 50, 55, 65, 72, 45, 35, 15, 45
+        ];
+
+        var histogram = d3.layout.histogram()
+                                 .range([0, 100])
+                                 .bins([0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100])
+
+        var maxValue = d3.max(histogram(dataSet), function(d, i) {
+          return d.y;
+        })
+
+        var yScale = d3.scale.linear()
+                        .domain([0, maxValue])
+                        .range([svgHeight, 0])
+
+        var barElements = d3.select("#myGraph")
+                            .selectAll("rect")
+                            .data(histogram(dataSet))
+                            .enter()
+                            .append("rect")
+                            .attr("class", "bar")
+                            .attr("x", function( d,i) {
+                              return i * barWidth;
+                            })
+                            .attr("y", function(d, i) {
+                              return yScale(d.y);
+                            })
+                            .attr("width", barWidth)
+                            .attr("height", function(d,i) {
+                              return svgHeight - yScale(d.y);
+                            })
+      }
+    </script>
+  </head>
+  <body>
+    <h1>히스토그램 표시</h1>
+    <svg id="myGraph"></svg>
+  </body>
+</html>
