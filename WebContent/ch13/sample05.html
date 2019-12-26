@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Sample</title>
+    <style>
+      svg {
+        width : 320px;
+        height : 240px;
+        border: 1px solid black;
+      }
+      .file {
+        stroke: black;
+        fill: #777;
+      }
+      .name {
+        font-size: 10pt;
+        text-anchor: middle;
+      }
+    </style>
+    <script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+    <script>
+      window.onload = function() {
+        var svgWidth = 320;
+        var svgHeight = 240;
+
+        var dataSet = {
+           name : "루트",
+           children : [
+             { name : "Dir1", children : [
+               { name : "Dir2", children : [
+                 { name : "파일A", value : 5000 },
+                 { name : "파일B", value : 3000 },
+                 { name : "Dir3", children : [
+                   { name : "파일C", value : 2000 },
+                   { name : "Dir4", children : [
+                     { name : "파일D", value : 1000 },
+                     { name : "파일E", value : 1500 }
+                   ]}
+                 ]}
+               ]}
+             ]}
+           ]
+        }
+
+        var treemap = d3.layout.treemap()
+          .size([svgWidth, svgHeight])
+
+        var tmap = d3.select("#myGraph")
+          .selectAll("rect")
+          .data(treemap.nodes(dataSet))
+
+        tmap.enter()
+          .append("rect")
+          .attr("class", "block")
+          .attr("x", function(d, i) {
+            return d.x;
+          })
+          .attr("y", function(d,i) {
+            return d.y;
+          })
+          .attr("width", function(d, i) {
+            return d.dx;
+          })
+          .attr("height", function(d,i) {
+            return d.dy;
+          })
+          .style("opacity", 0)
+          .transition()
+          .delay(function(d,i) {
+            return d.depth * 500;
+          })
+          .style("opacity", function(d,i) {
+            return d.depth / 10;
+          })
+
+          tmap.enter()
+              .append("text")
+              .attr("class", "name")
+              .attr("transform", function(d,i) {
+                var deg = 0;
+                if(d.dx < d.dy) {
+                  deg = -90;
+                }
+                return "translate(" + (d.x + d.dx/2) + "," + (d.y + d.dy/2) +") rotate(" + deg + ")";
+              })
+              .attr("dy", "0.35em")
+              .text(function(d,i) {
+                if((d.depth == 0) || (d.children)) {
+                  return null;
+                }
+                return d.name;
+              })
+              .style("opacity", 0)
+              .transition()
+              .delay(function(d,i) {
+                return d.depth * 500;
+              })
+              .style("opacity", 1.0)
+      }
+    </script>
+  </head>
+  <body>
+    <h1>파일 계층을 단계적으로 표시</h1>
+    <svg id="myGraph"></svg>
+  </body>
+</html>

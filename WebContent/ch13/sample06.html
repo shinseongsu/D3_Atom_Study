@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Sample</title>
+    <style>
+      svg {
+        width : 800px;
+        height : 800px;
+        border: 1px solid black;
+      }
+      .block {
+        stroke: black;
+        fill: #ddd;
+      }
+      .name {
+        text-anchor: middle;
+      }
+    </style>
+    <script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+    <script>
+      window.onload = function() {
+        var svgWidth = 800;
+        var svgHeight = 800;
+
+        d3.text("sample.txt", function(error, plainText) {
+          var count = [];
+          for (var i = 0 ; i < plainText.length ; i++) {
+            var c = plainText.charAt(i);
+            if(!count[c]) {
+              count[c] = 1;
+            } else {
+              count[c] = count[c] + 1;
+            }
+          }
+
+          var temp = [];
+          for(i in count) {
+            temp.push({ name : i , value : count[i] });
+          }
+
+          var dataSet = {
+            children : temp
+          };
+
+          drawTreemap(dataSet);
+
+        })
+
+        function drawTreemap(dataSet) {
+
+          var treemap = d3.layout.treemap()
+            .size([svgWidth, svgHeight])
+
+          var tmap = d3.select("#myGraph")
+            .selectAll("rect")
+            .data(treemap.nodes(dataSet))
+
+          tmap.enter()
+            .append("rect")
+            .attr("class", "block")
+            .attr("x", function(d, i) {
+              return d.x;
+            })
+            .attr("y", function(d, i) {
+              return d.y;
+            })
+            .attr("width", function(d,i) {
+              return d.dx;
+            })
+            .attr("height", function(d,i) {
+              return d.dy;
+            })
+
+          tmap.enter()
+              .append("text")
+              .attr("class", "name")
+              .attr("transform", function(d,i){
+                return "translate(" + (d.x + d.dx/2) + "," + (d.y + d.dy/2) + ")";
+              })
+              .attr("dy", "0.2em")
+              .text(function(d,i) {
+                return d.name;
+              })
+              .style("font-size", function(d,i) {
+                return (d.dx * d.dy) / 200;
+              })
+
+        }
+
+      }
+    </script>
+  </head>
+  <body>
+    <h1>사용 문자수를 트리맵으로 표시</h1>
+    <svg id="myGraph"></svg>
+  </body>
+</html>

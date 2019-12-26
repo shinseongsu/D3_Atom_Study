@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Sample</title>
+    <style>
+      svg {
+        width : 320px;
+        height : 240px;
+        border: 1px solid black;
+      }
+      .block {
+        stroke : black;
+        fill : #ddd;
+      }
+    </style>
+    <script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+    <script>
+      window.onload = function() {
+        var svgWidth = 320;
+        var svgHeight = 240;
+
+        var dataSet = {
+          children : [
+            { value : 10 },
+            { value : 8 },
+            { value : 2 }
+          ]
+        }
+
+        var treemap = d3.layout.treemap()
+          .size([svgWidth, svgHeight])
+
+        var tmap = d3.select("#myGraph")
+          .selectAll("rect")
+          .data(treemap.nodes(dataSet))
+
+        tmap.enter()
+          .append("rect")
+          .attr("class", "block")
+          .attr("x", function(d, i) {
+            return d.x;
+          })
+          .attr("y", function(d,i) {
+            return d.y;
+          })
+          .attr("width", function(d, i) {
+            return d.dx;
+          })
+          .attr("height", function(d,i) {
+            return d.dy;
+          })
+      }
+    </script>
+  </head>
+  <body>
+    <h1>트리맵 레이아웃 표시</h1>
+    <svg id="myGraph"></svg>
+  </body>
+</html>

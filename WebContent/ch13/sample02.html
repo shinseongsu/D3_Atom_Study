@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Sample</title>
+    <style>
+      svg {
+        width : 320px;
+        height : 240px;
+        border: 1px solid black;
+      }
+      .block {
+        stroke : black;
+        fill : #ddd;
+      }
+      .name {
+        font-size: 18pt;
+        text-anchor: middle;
+      }
+    </style>
+    <script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+    <script>
+      window.onload = function() {
+        var svgWidth = 320;
+        var svgHeight = 240;
+
+        var dataSet = {
+          children : [
+            { value : 100 },
+            { children : [
+              { value : 50 },
+              { children : [
+                { value : 30 },
+                { value : 20 },
+                { value : 10 }
+              ]}
+            ]}
+          ]
+        }
+
+        var treemap = d3.layout.treemap()
+          .size([svgWidth, svgHeight])
+
+        var tmap = d3.select("#myGraph")
+          .selectAll("rect")
+          .data(treemap.nodes(dataSet))
+
+        tmap.enter()
+          .append("rect")
+          .attr("class", "block")
+          .attr("x", function(d, i) {
+            return d.x;
+          })
+          .attr("y", function(d,i) {
+            return d.y;
+          })
+          .attr("width", function(d, i) {
+            return d.dx;
+          })
+          .attr("height", function(d,i) {
+            return d.dy;
+          })
+
+          tmap.enter()
+              .append("text")
+              .attr("class", "name")
+              .attr("transform", function(d,i) {
+                return "translate(" + (d.x + d.dx/2) + "," + (d.y + d.dy/2) +")";
+              })
+              .attr("dy", "0.35em")
+              .text(function(d,i) {
+                if((d.depth == 0) || (d.children)) {
+                  return null;
+                }
+                return d.value;
+              })
+      }
+    </script>
+  </head>
+  <body>
+    <h1>트리맵 레이아웃 표시</h1>
+    <svg id="myGraph"></svg>
+  </body>
+</html>
