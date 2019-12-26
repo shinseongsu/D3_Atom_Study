@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Sample</title>
+    <style>
+      svg {
+        width: 320px;
+        height: 320px;
+        border: 1px solid black;
+      }
+      circle {
+        stroke: none;
+        opacity: 0.25;
+      }
+      text {
+        font-size: 10pt;
+        text-anchor: middle;
+        fill: black;
+        opacity: 0;
+      }
+    </style>
+    <script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+    <script>
+      window.onload = function() {
+        var svgEle = document.getElementById("myGraph");
+        var svgWidth = window.getComputedStyle(svgEle, null).
+                                                    getPropertyValue("width");
+        var svgHeight = window.getComputedStyle(svgEle, null).
+                                                    getPropertyValue("height");
+
+        svgWidth = parseFloat(svgWidth);
+        svgHeight = parseFloat(svgHeight);
+        var pack;
+        var circles;
+        var texts;
+        var bubble;
+        var allData;
+        var year = "year2000";
+
+        d3.json("data.json", function(error, data) {
+          allData = data;
+          drawPackLayout(data);
+        });
+
+        function drawPackLayout(dataSet) {
+          var color = d3.scale.category10();
+
+          var bubble = d3.layout.pack()
+            .size([320, 320]);
+
+          var pack = d3.select("#myGraph")
+                .selectAll("g")
+                .data(bubble.value(function(d,i) {
+                  return d[year];
+                }).nodes(dataSet))
+                .enter()
+                .append("g")
+
+          circles = pack.append("circle")
+                .attr("r", 0)
+                .attr("transform", function(d,i) {
+                  return "translate(" + d.x + "," + d.y + ")";
+                })
+                .style("fill", function(d, i) {
+                  return color(i);
+                })
+
+          circles.transition()
+                .duration(function(d, i) {
+                  return d.depth * 1000 + 500;
+                })
+                .attr("r", function(d) {
+                  return d.r;
+                })
+
+           texts = pack.append("text")
+                .attr("transform", function(d, i) {
+                  return "translate(" + d.x + "," + d.y + ")";
+                })
+
+           texts.style("opacity", 10)
+                  .transition()
+                  .duration(3000)
+                  .style("opacity", 1.0)
+                  .text(function(d, i) {
+                    if(d.depth == 1) {
+                      return d.name;
+                    }
+                    return null;
+                  })
+
+            d3.selectAll("input").on("click", function() {
+              year = d3.select(this).attr("data-year");
+              pack.data(bubble.value(function(d, i) {
+                return d[year];
+              }).nodes(allData))
+
+              circles
+                .transition()
+                .duration(500)
+                .ease("bounce")
+                .attr("r", function(d,i) {
+                  return d.r;
+                })
+                .attr("transform", function(d, i) {
+                  return "translate(" + d.x + "," + d.y + ")";
+                })
+
+                texts
+                  .transition()
+                  .duration(500)
+                  .ease("bounce")
+                  .attr("transform", function(d,i) {
+                    return "translate(" + d.x + ", " + d.y + ")";
+                  })
+            });
+
+        }
+      }
+    </script>
+  </head>
+  <body>
+    <h1>인구 데이터를 불러와 표시</h1>
+    <svg id="myGraph"></svg>
+    <form>
+      <input type="button" value="2000년" data-year="year2000">
+      <input type="button" value="2005년" data-year="year2005">
+      <input type="button" value="2010년" data-year="year2010">
+    </form>
+  </body>
+</html>

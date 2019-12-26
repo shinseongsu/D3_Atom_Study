@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Sample</title>
+    <style>
+      svg {
+        width: 320px;
+        height: 320px;
+        border: 1px solid black;
+      }
+      circle {
+        stroke: red;
+        fill: none;
+      }
+    </style>
+    <script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+    <script>
+      window.onload = function() {
+        var svgWidth = 320;
+        var svgHeight = 320;
+
+        var dataSet = {
+          value : 40
+        }
+
+        var bubble = d3.layout.pack()
+          .size([320, 320])
+        d3.select("#myGraph")
+          .selectAll("circle")
+          .data(bubble.nodes(dataSet))
+          .enter()
+          .append("circle")
+          .attr("r", function(d) {
+            return d.r;
+          })
+          .attr("cx", function(d, i) {
+            return d.x;
+          })
+          .attr("cy", function(d, i) {
+            return d.y;
+          })
+      }
+    </script>
+  </head>
+  <body>
+    <h1>팩 레이아웃 표시</h1>
+    <svg id="myGraph"></svg>
+  </body>
+</html>
