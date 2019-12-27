@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Sample</title>
+    <style>
+      svg {
+        width : 160px;
+        height: 240px;
+        border: 1px solid black;
+      }
+      .block {
+        stroke: black;
+        fill: none;
+      }
+    </style>
+    <script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+    <script>
+    window.onload = function() {
+
+      var svgEle = document.getElementById("myGraph");
+      var svgWidth = window.getComputedStyle(svgEle, null).
+                                                      getPropertyValue("width");
+      var svgHeight = window.getComputedStyle(svgEle, null).
+                                                      getPropertyValue("height");
+
+      svgWidth = parseFloat(svgWidth);
+      svgHeight = parseFloat(svgHeight);
+      var blockSize = 20;
+      var heatMap;
+      var color;
+      var maxValue;
+      var dataSet = [];
+
+      d3.text("mydata.txt", function(error, plainText) {
+        var temp = plainText.split(",");
+        for(var i = 0 ; i < temp.length ; i++) {
+          dataSet[i] = parseInt(temp[i]);
+        }
+        drawHeatMap();
+
+        setInterval(function() {
+          for(var i = 0 ; i < dataSet.length ; i++) {
+            var n = ((Math.random() * 3.5) | 0 ) - 2;
+            dataSet[i] = dataSet[i] + n;
+            if(dataSet[i] < 0) { dataSet[i] = 0; }
+            if(dataSet[i] > maxValue) { dataSet[i] = maxValue; }
+          }
+          heatMap.data(dataSet)
+            .style("fill", function(d,i){
+              return color(d/maxValue);
+            })
+        }, 1000);
+      })
+
+      function drawHeatMap() {
+        color = d3.interpolateHsl("blue", "yellow");
+        maxValue = d3.max(dataSet);
+
+        heatMap = d3.select("#myGraph")
+          .selectAll("rect")
+          .data(dataSet);
+
+        heatMap.enter()
+               .append("rect")
+               .attr("class", "block")
+               .attr("x", function(d, i) {
+                 return ( i % 8 ) * blockSize;
+               })
+               .attr("y", function(d, i) {
+                 return Math.floor(i/8) * blockSize;
+               })
+               .attr("width", function(d,i) {
+                 return blockSize;
+               })
+               .attr("height", function(d,i){
+                 return blockSize;
+               })
+               .style("fill", function(d,i) {
+                 return color(d/maxValue);
+          })
+      }
+      }
+    </script>
+  </head>
+  <body>
+    <h1>히트맵 표시</h1>
+    <svg id="myGraph"></svg>
+  </body>
+</html>
